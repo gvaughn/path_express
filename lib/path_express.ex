@@ -161,7 +161,7 @@ defmodule PathExpress do
   See documentation for Kernel.get_in/2
 
   """
-  @spec get_in(Access.t(), nonempty_list(term)) :: term
+  @spec get_in(Access.t(), Kernel.nonempty_list(term)) :: term
   def get_in(data, keys) do
     Kernel.get_in(data, Enum.map(keys, &key_to_func/1))
   end
