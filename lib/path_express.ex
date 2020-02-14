@@ -1,4 +1,6 @@
 defmodule PathExpress do
+  import Kernel, except: [get_in: 2]
+
   @moduledoc """
   Path Express provides nil-safe list navigation for use with `Kernel.get_in/2`
   plus its own `get_in/2` wrapper with some shortcuts.
@@ -110,4 +112,61 @@ defmodule PathExpress do
   defp filter(:get, _data, _func, _next) do
     []
   end
+
+  @doc """
+  Gets a value from a nested structure.
+
+  Uses a combination of functions from the `Access` module and
+  PathExpress to traverse the structures in a nil-safe way
+  according to the given `keys`, unless the `key` is a
+  function, which is detailed in a later section.
+
+  ## Examples
+
+      iex> users = %{"john" => %{age: 27}, "meg" => %{age: 23}}
+      iex> get_in(users, ["john", :age])
+      27
+
+  In case any of the keys returns `nil`, `nil` will be returned:
+
+      iex> users = %{"john" => %{age: 27}, "meg" => %{age: 23}}
+      iex> get_in(users, ["unknown", :age])
+      nil
+      iex> get_in(users, ["unknown", PathExpress.at(0)])
+      nil
+
+  ## Shortcuts
+
+  Integers in keys will be treated as `PathExpress.at/1` and an
+  empty list will be treated as `PathExpress.all/`
+
+      iex> alias PathExpress, as: PE
+      iex> data = %{"users" => [%{name: "john", age: 27}, %{name: "meg", age: 23}]}
+      iex> PE.get_in(data, ["users", 0, :name])
+      "john"
+      iex> PE.get_in(data, ["users", [], :age])
+      [27, 23]
+
+  The examples above are nil-safe:
+
+      iex> alias PathExpress, as: PE
+      iex> data = %{}
+      iex> PE.get_in(data, ["users", 0, :name])
+      nil
+      iex> PE.get_in(data, ["users", [], :age])
+      []
+
+  ## Functions as keys
+
+  See documentation for Kernel.get_in/2
+
+  """
+  @spec get_in(Access.t(), nonempty_list(term)) :: term
+  def get_in(data, keys) do
+    Kernel.get_in(data, Enum.map(keys, &key_to_func/1))
+  end
+
+  defp key_to_func(k) when is_integer(k), do: at(k)
+  defp key_to_func([]), do: all()
+  defp key_to_func(k), do: k
 end
