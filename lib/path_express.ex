@@ -37,17 +37,6 @@ defmodule PathExpress do
     []
   end
 
-  # defp all([head | rest], next, gets, updates) do
-  #   case next.(head) do
-  #     {get, update} -> all(rest, next, [get | gets], [update | updates])
-  #     :pop -> all(rest, next, [head | gets], updates)
-  #   end
-  # end
-
-  # defp all([], _next, gets, updates) do
-  #   {:lists.reverse(gets), :lists.reverse(updates)}
-  # end
-
   @doc ~S"""
   Returns a function that accesses the element at `index` (zero based) of a list.
 
@@ -79,5 +68,46 @@ defmodule PathExpress do
 
   defp at(:get, _data, _index, next) do
     next.(nil)
+  end
+
+  @doc ~S"""
+  Returns a function that accesses all elements of a list that match the provided predicate.
+
+  The returned function is typically passed as an accessor to `get_in/2` and `Kernel.get_in/2`.
+
+  ## Examples
+      iex> list = [%{name: "john", salary: 10}, %{name: "francine", salary: 30}]
+      iex> get_in(list, [PathExpress.filter(&(&1.salary > 20)), :name])
+      ["francine"]
+
+  When no match is found, an empty list is returned:
+
+      iex> list = [%{name: "john", salary: 10}, %{name: "francine", salary: 30}]
+      iex> get_in(list, [PathExpress.filter(&(&1.salary >= 50)), :name])
+      []
+
+   `nil` or a non-list is traversed by returning an empty list, as if no match is found:
+
+      iex> get_in(nil, [PathExpress.filter(&(&1.salary >= 50)), :name])
+      []
+      iex> get_in(%{}, [PathExpress.filter(fn a -> a == 10 end)])
+      []
+
+   An error is raised if the predicate is not a function or is of the incorrect arity:
+
+      iex> get_in([], [PathExpress.filter(5)])
+      ** (FunctionClauseError) no function clause matching in PathExpress.filter/1
+  """
+  @spec filter((term -> boolean)) :: Kernel.access_fun(data :: list, get_value :: list)
+  def filter(func) when is_function(func) do
+    fn op, data, next -> filter(op, data, func, next) end
+  end
+
+  defp filter(:get, data, func, next) when is_list(data) do
+    data |> Enum.filter(func) |> Enum.map(next)
+  end
+
+  defp filter(:get, _data, _func, _next) do
+    []
   end
 end
