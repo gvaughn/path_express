@@ -69,7 +69,14 @@ def deps do
 end
 ```
 
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at [https://hexdocs.pm/path_express](https://hexdocs.pm/path_express).
+Docs at [https://hexdocs.pm/path_express](https://hexdocs.pm/path_express).
+
+## TODO
+
+* get_in/3 that takes a default value when path cannot be navigated
+* get_in!/2 which assertively raises if any path elements not found (key or list style)
+* fetch_in/2 which returns `{:ok, value}` or `:error`
+* better CI
+* handling of Tuple paths?
+* handling up `put_in`, `update_in` `pop_in`, `get_and_update_in` (discussing plans)
 
