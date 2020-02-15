@@ -58,8 +58,7 @@ integers or an empty list, then `Access.key/1` has you covered.
 
 ## Installation
 
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `path_express` to your list of dependencies in `mix.exs`:
+Add`path_express` to your list of dependencies in `mix.exs`:
 
 ```elixir
 def deps do
