@@ -72,7 +72,9 @@ Docs at [https://hexdocs.pm/path_express](https://hexdocs.pm/path_express).
 
 ## TODO
 
+* tie this README into the starting page at hexdocs
 * get_in/2 that takes a keyword list of {output_key, path} pairs and return a map of results
+* get_in/2 path shortcut of `[&func/1]` that will do an Enum.map over all list values
 * get_in/3 that takes a default value when path cannot be navigated
 * get_in!/2 which assertively raises if any path elements not found (key or list style)
 * fetch_in/2 which returns `{:ok, value}` or `:error`
