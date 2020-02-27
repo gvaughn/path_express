@@ -5,7 +5,7 @@ defmodule PathExpress.MixProject do
     [
       app: :path_express,
       version: "0.2.0",
-      elixir: "~> 1.9",
+      elixir: "~> 1.0",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
       docs: docs(),
