@@ -166,6 +166,20 @@ defmodule PathExpress do
     Kernel.get_in(data, Enum.map(keys, &key_to_func/1))
   end
 
+  @doc """
+  Allows pulling multiple paths out of a data tree into a map.
+
+      iex> data = %{a: %{b: "pick me"}, c: [%{d: "pick me too"}]}
+      iex> mappings = %{me: [:a, :b], me2: [:c, 0, :d]}
+      iex> PathExpress.get_all_in(data, mappings)
+      %{me: "pick me", me2: "pick me too"}
+  """
+
+  @spec get_all_in(Access.t(), map()) :: map
+  def get_all_in(container, mappings) do
+    Map.new(mappings, fn {key, path} -> {key, __MODULE__.get_in(container, path)} end)
+  end
+
   defp key_to_func(k) when is_integer(k), do: at(k)
   defp key_to_func([]), do: all()
   defp key_to_func(k), do: k
