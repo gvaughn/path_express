@@ -63,7 +63,7 @@ Add`path_express` to your list of dependencies in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:path_express, "~> 0.1.0"}
+    {:path_express, "~> 0.2.0"}
   ]
 end
 ```
