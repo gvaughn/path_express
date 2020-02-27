@@ -8,6 +8,7 @@ defmodule PathExpress.MixProject do
       elixir: "~> 1.9",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
+      docs: docs(),
       description: description(),
       package: package(),
       source_url: "https://github.com/gvaughn/path_express"
@@ -25,6 +26,14 @@ defmodule PathExpress.MixProject do
       maintainers: ["Greg Vaughn"],
       licenses: ["MIT"],
       links: %{"GitHub" => "https://github.com/gvaughn/path_express"}
+    ]
+  end
+
+  def docs() do
+    [
+      main: "readme",
+      extras: ["README.md"],
+      source_url: "https://github.com/gvaughn/path_express/"
     ]
   end
 
