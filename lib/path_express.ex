@@ -15,8 +15,11 @@ defmodule PathExpress do
       iex> list = [%{name: "john"}, %{name: "mary"}]
       iex> get_in(list, [PathExpress.all(), :name])
       ["john", "mary"]
+
+   An empty list is a shortcut to `all/0` when `PathExpress.get_in/2` used
+
       iex> data = %{items: [%{qty: 1}, %{qty: 2}]}
-      iex> get_in(data, [:items, PathExpress.all(), :qty])
+      iex> PathExpress.get_in(data, [:items, [], :qty])
       [1, 2]
 
    `nil` or a non-list is traversed by returning empty list:
@@ -36,6 +39,42 @@ defmodule PathExpress do
   end
 
   defp all(:get, _data, _next) do
+    []
+  end
+
+  @doc ~S"""
+  Returns a function that maps all the elements in a list through your function ref.
+
+  The returned function is typically passed as an accessor to `get_in/2` and `Kernel.get_in/2`.
+
+  ## Examples
+      iex> alias PathExpress, as: PE
+      iex> data = %{names: ["john", "mary"]}
+      iex> get_in(data, [:names, PE.map_all(&String.upcase/1)])
+      ["JOHN", "MARY"]
+
+   A list containing the function ref is a shortcut to `map_all/1` when `PathExpress.get_in/2` used
+      iex> data = %{quantities: [1, 2]}
+      iex> PathExpress.get_in(data, [:quantities, [&(&1 + 1)]])
+      [2, 3]
+
+   `nil` or a non-list is traversed by returning empty list:
+
+       iex> get_in(nil, [PathExpress.map_all(&String.upcase/1)])
+       []
+       iex> get_in(%{}, [PathExpress.map_all(&String.upcase/1)])
+       []
+  """
+  @spec map_all(fun(1)) :: Kernel.access_fun(data :: list, get_value :: list)
+  def map_all(custom_f) do
+    &map_all(&1, &2, &3, custom_f)
+  end
+
+  defp map_all(:get, data, next, custom_f) when is_list(data) do
+    Enum.map(data, fn x -> x |> custom_f.() |> next.() end)
+  end
+
+  defp map_all(:get, _data, _next, _custom_f) do
     []
   end
 
@@ -166,7 +205,22 @@ defmodule PathExpress do
     Kernel.get_in(data, Enum.map(keys, &key_to_func/1))
   end
 
+  @doc """
+  Allows pulling multiple paths out of a data tree into a map.
+
+      iex> data = %{a: %{b: "pick me"}, c: [%{d: "pick me too"}]}
+      iex> mappings = %{me: [:a, :b], me2: [:c, 0, :d]}
+      iex> PathExpress.get_all_in(data, mappings)
+      %{me: "pick me", me2: "pick me too"}
+  """
+
+  @spec get_all_in(Access.t(), map()) :: map
+  def get_all_in(container, mappings) do
+    Map.new(mappings, fn {key, path} -> {key, __MODULE__.get_in(container, path)} end)
+  end
+
   defp key_to_func(k) when is_integer(k), do: at(k)
   defp key_to_func([]), do: all()
+  defp key_to_func([f]) when is_function(f, 1), do: map_all(f)
   defp key_to_func(k), do: k
 end
